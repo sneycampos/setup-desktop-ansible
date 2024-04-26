@@ -46,7 +46,7 @@ You can install Ansible on Ubuntu using the following steps:
 3. Execute the Ansible playbook:
 
     ```bash
-    ansible-playbook playbook.yaml
+    ansible-playbook playbook.yaml --ask-become-pass
     ```
 
 ## What This Playbook Does
