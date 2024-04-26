@@ -1,0 +1,87 @@
+- name: Instalar programas no Ubuntu
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Instalar Firefox
+      apt:
+        name: firefox
+        state: present
+
+    - name: Instalar LibreOffice
+      apt:
+        name: libreoffice
+        state: present
+
+    - name: Instalar Postman via Snap
+      snap:
+        name: postman
+
+    - name: Instalar Slack via Snap
+      snap:
+        name: slack
+
+    - name: Instalar Spotify via Snap
+      snap:
+        name: spotify
+
+    - name: Instalar Telegram Desktop via Snap
+      snap:
+        name: telegram-desktop
+
+    - name: Baixar o arquivo warp.deb
+      get_url:
+        url: "https://releases.warp.dev/stable/v0.2024.04.23.08.01.stable_03/warp-terminal_0.2024.04.23.08.01.stable.03_amd64.deb"
+        dest: /tmp/warp.deb
+
+    - name: Instalar o warp.dev usando o .deb
+      apt:
+        deb: /tmp/warp.deb
+        state: present
+
+    - name: Instalar Git
+      apt:
+        name: git
+        state: present
+
+    - name: Instalar ZSH
+      apt:
+          name: zsh
+          state: present
+
+    - name: Instalar Docker via apt e adicionar o usuário ao grupo docker para não precisar de sudo
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Adicionar o usuário ao grupo docker (sudo usermod -aG docker $USER)
+      user:
+        name: "silvioney"
+        groups: docker
+        append: yes
+
+    - name: Apply the changes
+      command: newgrp docker
+
+    - name: Instalar Docker Compose
+      apt:
+          name: docker-compose
+          state: present
+
+    - name: Check if Docker runs without sudo
+      become: no
+      register: docker_output
+      command: docker run hello-world
+      ignore_errors: yes
+
+    - name: Verificar se o comando foi bem-sucedido
+      debug:
+        msg: "O comando docker run hello-world foi executado com sucesso."
+      when: docker_output.rc == 0
+
+    - name: Exibir saída do comando em caso de erro
+      debug:
+        msg: "Erro ao executar o comando docker run hello-world: {{ docker_output.stdout }}"
+      when: docker_output.rc != 0
+
+    - name: Instalar NVM (Permitem instalar várias versões do Node.js)
+      shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
