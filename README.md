@@ -47,7 +47,7 @@ You can install Ansible on Ubuntu using the following steps:
 
     Tools
     ```bash
-    ansible-playbook tools.yaml --ask-become-pass
+    ansible-playbook tools.yml --ask-become-pass
     ```
 
     Docker
