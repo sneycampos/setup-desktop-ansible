@@ -1,8 +1,9 @@
-- name: Instalar programas no Ubuntu
+- name: Prepare Ubuntu Desktop
   hosts: localhost
   become: yes
   tasks:
-    # set the user to the current user
+
+    # set the user variable to the current user
     - name: Set the user
       become: false
       set_fact: user="{{ lookup('env','USER') }}"
@@ -10,6 +11,15 @@
     - name: Updates the apt cache
       apt:
         update_cache: yes
+
+
+    - name: Add apt repositories
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      loop:
+        - ppa:hluk/copyq
+
 
     # install apt softwares using loop
     - name: Install apt packages
@@ -26,6 +36,7 @@
         - flameshot
         - firefox
         - libreoffice
+        - copyq
 
     # install snap softwares using loop
     - name: Install snap packages
@@ -40,17 +51,17 @@
         - spotify
         - telegram-desktop
 
-    - name: Baixar o arquivo warp.deb
+    - name: Download the warp.deb file
       get_url:
         url: "https://releases.warp.dev/stable/v0.2024.04.23.08.01.stable_03/warp-terminal_0.2024.04.23.08.01.stable.03_amd64.deb"
         dest: /tmp/warp.deb
 
-    - name: Instalar o warp.dev usando o .deb
+    - name: Install the warp.deb file
       apt:
         deb: /tmp/warp.deb
         state: present
 
-    - name: Adicionar o usuário ao grupo docker (sudo usermod -aG docker $USER)
+    - name: Add the user to the docker group to run docker without sudo
       user:
         name: "{{ user }}"
         groups: docker
