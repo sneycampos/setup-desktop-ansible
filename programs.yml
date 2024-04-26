@@ -2,31 +2,43 @@
   hosts: localhost
   become: yes
   tasks:
-    - name: Instalar Firefox
+    # set the user to the current user
+    - name: Set the user
+      become: false
+      set_fact: user="{{ lookup('env','USER') }}"
+
+    - name: Updates the apt cache
       apt:
-        name: firefox
-        state: present
+        update_cache: yes
 
-    - name: Instalar LibreOffice
+    # install apt softwares using loop
+    - name: Install apt packages
       apt:
-        name: libreoffice
+        name: "{{ item }}"
         state: present
+      loop:
+        - curl
+        - wget
+        - git
+        - zsh
+        - htop
+        - docker.io
+        - flameshot
+        - firefox
+        - libreoffice
 
-    - name: Instalar Postman via Snap
+    # install snap softwares using loop
+    - name: Install snap packages
       snap:
-        name: postman
-
-    - name: Instalar Slack via Snap
-      snap:
-        name: slack
-
-    - name: Instalar Spotify via Snap
-      snap:
-        name: spotify
-
-    - name: Instalar Telegram Desktop via Snap
-      snap:
-        name: telegram-desktop
+        name: "{{ item }}"
+        state: present
+      loop:
+        - code
+        - discord
+        - postman
+        - slack
+        - spotify
+        - telegram-desktop
 
     - name: Baixar o arquivo warp.deb
       get_url:
@@ -38,34 +50,14 @@
         deb: /tmp/warp.deb
         state: present
 
-    - name: Instalar Git
-      apt:
-        name: git
-        state: present
-
-    - name: Instalar ZSH
-      apt:
-          name: zsh
-          state: present
-
-    - name: Instalar Docker via apt e adicionar o usuário ao grupo docker para não precisar de sudo
-      apt:
-        name: docker.io
-        state: present
-
     - name: Adicionar o usuário ao grupo docker (sudo usermod -aG docker $USER)
       user:
-        name: "silvioney"
+        name: "{{ user }}"
         groups: docker
         append: yes
 
     - name: Apply the changes
       command: newgrp docker
-
-    - name: Instalar Docker Compose
-      apt:
-          name: docker-compose
-          state: present
 
     - name: Check if Docker runs without sudo
       become: no
