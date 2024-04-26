@@ -50,14 +50,13 @@ You can install Ansible on Ubuntu using the following steps:
     ansible-playbook tools.yaml --ask-become-pass
     ```
 
-    Docker (Install docker, docker compose plugin and configure docker to run without sudo)
+    Docker
     ```bash
     ansible-playbook docker.yml --ask-become-pass
     ```
 
-## What This Playbook Does
+## What This Playbooks Does
 
-- Configures the current user for execution.
 - Updates the apt cache.
 - Adds specified apt repositories.
 - Installs essential apt packages:
@@ -67,7 +66,8 @@ You can install Ansible on Ubuntu using the following steps:
     - git
     - zsh
     - htop
-    - docker.io
+    - docker
+    - docker compose
     - flameshot
     - firefox
     - libreoffice
@@ -80,14 +80,12 @@ You can install Ansible on Ubuntu using the following steps:
     - spotify
     - telegram-desktop
 - Downloads and installs the Warp Terminal.
-- Adds the current user to the docker group.
-- Applies changes to the docker group membership.
-- Checks if Docker runs without sudo.
+- Adds the current user to the docker group to run docker without sudo
 - Installs NVM (Node Version Manager) to manage multiple Node.js versions.
 
 ## Customization
 
-You can customize this playbook by modifying the `playbook.yaml` file to include additional apt repositories, packages, or configurations according to your requirements.
+You can customize this playbook by modifying the `tools.yml` and `docker.yml` files to include additional apt repositories, packages, or configurations according to your requirements.
 
 ## Notes
 
