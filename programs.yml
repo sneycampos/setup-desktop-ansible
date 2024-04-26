@@ -12,14 +12,12 @@
       apt:
         update_cache: yes
 
-
     - name: Add apt repositories
       apt_repository:
         repo: "{{ item }}"
         state: present
       loop:
         - ppa:hluk/copyq
-
 
     # install apt softwares using loop
     - name: Install apt packages
@@ -29,6 +27,7 @@
       loop:
         - curl
         - wget
+        - gdebi
         - git
         - zsh
         - htop
