@@ -1,19 +1,36 @@
 ---
 - name: Creates new Users with Home Directory and sudo group
   hosts: localhost
+  become: true
   vars:
-    user: dreamshaper
-    password: dreamshaper
+    user: silvioney
+    password: silvioney
 
   tasks:
+    - name: Creates new group
+      ansible.builtin.group:
+        name: "{{ user }}"
+        state: present
+
     - name: Creates a new user
       ansible.builtin.user:
-        state: present
-        name: "{{ user }}"
-        create_home: yes
-        shell: /bin/bash
-        password: "{{ password | password_hash('sha512') }}"
-        group: sudo
+          name: "{{ user }}"
+          password: "{{ password | password_hash('sha512') }}"
+          shell: /bin/bash
+          home: /home/{{ user }}
+          createhome: yes
+          state: present
+          groups: "{{ user }}, sudo"
+          append: yes
+
+    - name: Set home directory permissions
+      ansible.builtin.file:
+        path: /home/{{ user }}
+        state: directory
+        recurse: yes
+        mode: 0755
+        owner: "{{ user }}"
+        group: "{{ user }}"
 
     - name: Creates the .ssh folder
       ansible.builtin.file:
