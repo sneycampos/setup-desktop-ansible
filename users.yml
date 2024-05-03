@@ -1,0 +1,32 @@
+---
+- name: Creates new Users with Home Directory and sudo group
+  hosts: localhost
+  vars:
+    user: dreamshaper
+    password: dreamshaper
+
+  tasks:
+    - name: Creates a new user
+      ansible.builtin.user:
+        state: present
+        name: "{{ user }}"
+        create_home: yes
+        shell: /bin/bash
+        password: "{{ password | password_hash('sha512') }}"
+        group: sudo
+
+    - name: Creates the .ssh folder
+      ansible.builtin.file:
+        path: /home/{{ user }}/.ssh
+        state: directory
+        mode: 0700
+        owner: "{{ user }}"
+        group: "{{ user }}"
+
+    - name: Creates the authorized_keys file
+      ansible.builtin.file:
+        path: /home/dreamshaper/.ssh/authorized_keys
+        state: touch
+        mode: 0600
+        owner: "{{ user }}"
+        group: "{{ user }}"
