@@ -25,7 +25,7 @@
 
     - name: Creates the authorized_keys file
       ansible.builtin.file:
-        path: /home/dreamshaper/.ssh/authorized_keys
+        path: /home/{{ user }}/.ssh/authorized_keys
         state: touch
         mode: 0600
         owner: "{{ user }}"
