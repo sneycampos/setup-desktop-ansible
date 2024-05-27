@@ -3,6 +3,8 @@
   become: true
   vars:
     ansible_user: "{{ lookup('env', 'USER') }}"
+    docker_gpg_key_url: "https://download.docker.com/linux/ubuntu/gpg"
+    docker_repo: "deb https://download.docker.com/linux/ubuntu focal stable"
 
   tasks:
     - name: Update and upgrade all packages to the latest version
@@ -13,7 +15,7 @@
 
     - name: Install required system packages
       ansible.builtin.apt:
-        pkg:
+        name:
           - apt-transport-https
           - ca-certificates
           - curl
@@ -23,19 +25,27 @@
 
     - name: Add Docker GPG apt Key
       ansible.builtin.apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
+        url: "{{ docker_gpg_key_url }}"
         state: present
 
     - name: Add Docker Repository
       ansible.builtin.apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        repo: "{{ docker_repo }}"
         state: present
 
-    - name: Update apt and install docker-ce
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install Docker CE
       ansible.builtin.apt:
         name: docker-ce
         state: latest
-        update_cache: true
+
+    - name: Install Docker Compose Plugin
+      ansible.builtin.apt:
+        name: docker-compose-plugin
+        state: latest
 
     - name: Add Docker group
       ansible.builtin.group:
@@ -50,9 +60,6 @@
 
     - name: Enable and start Docker services
       ansible.builtin.systemd:
-        name: "{{ item }}"
+        name: docker
         enabled: true
         state: started
-      loop:
-        - docker.service
-        - containerd.service
