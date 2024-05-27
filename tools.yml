@@ -2,55 +2,74 @@
   hosts: localhost
   become: true
 
+  vars:
+    apt_repositories:
+      - ppa:hluk/copyq
+    apt_packages:
+      - curl
+      - wget
+      - gdebi
+      - git
+      - zsh
+      - htop
+      - flameshot
+      - firefox
+      - libreoffice
+      - copyq
+    snap_packages:
+      - discord
+      - postman
+      - slack
+      - spotify
+      - telegram-desktop
+    warp_deb_url: "https://releases.warp.dev/stable/v0.2024.04.23.08.01.stable_03/warp-terminal_0.2024.04.23.08.01.stable.03_amd64.deb"
+    warp_deb_dest: "/tmp/warp.deb"
+
   tasks:
 
     - name: Add apt repositories
       ansible.builtin.apt_repository:
         repo: "{{ item }}"
         state: present
-      loop:
-        - ppa:hluk/copyq
+      loop: "{{ apt_repositories }}"
+      tags: apt_repositories
 
     - name: Update and upgrade all packages to the latest version
       ansible.builtin.apt:
         update_cache: true
         upgrade: dist
         cache_valid_time: 3600
+      tags: update_upgrade
 
     - name: Install apt packages
       ansible.builtin.apt:
         name: "{{ item }}"
         state: present
-      loop:
-        - curl
-        - wget
-        - gdebi
-        - git
-        - zsh
-        - htop
-        - flameshot
-        - firefox
-        - libreoffice
-        - copyq
+      loop: "{{ apt_packages }}"
+      tags: apt_packages
+
+    - name: Install Visual Studio Code with classic confinement
+      ansible.builtin.snap:
+        name: code
+        state: present
+        classic: true
+      tags: snap_packages
 
     - name: Install snap packages
       ansible.builtin.snap:
         name: "{{ item }}"
         state: present
-      loop:
-        - code
-        - discord
-        - postman
-        - slack
-        - spotify
-        - telegram-desktop
+      loop: "{{ snap_packages }}"
+      tags: snap_packages
 
     - name: Download the warp.deb file
       ansible.builtin.get_url:
-        url: "https://releases.warp.dev/stable/v0.2024.04.23.08.01.stable_03/warp-terminal_0.2024.04.23.08.01.stable.03_amd64.deb"
-        dest: /tmp/warp.deb
+        url: "{{ warp_deb_url }}"
+        dest: "{{ warp_deb_dest }}"
+      tags: warp_install
 
     - name: Install the warp.deb file
       ansible.builtin.apt:
-        deb: /tmp/warp.deb
+        deb: "{{ warp_deb_dest }}"
         state: present
+      tags: warp_install
