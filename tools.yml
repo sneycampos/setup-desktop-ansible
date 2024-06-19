@@ -15,6 +15,7 @@
       - flameshot
       - firefox
       - libreoffice
+      - xclip
       - copyq
     snap_packages:
       - discord
