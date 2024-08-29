@@ -1,0 +1,66 @@
+---
+- name: Secure SSH by enforcing key-based authentication
+  hosts: remote_servers
+  become: yes
+
+  tasks:
+    - name: Validates if user "{{ new_user }}" exists
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ new_user }}"
+
+    - name: Check if authorized_keys file exists
+      stat:
+        path: "/home/{{ new_user }}/.ssh/authorized_keys"
+      register: authorized_keys_file
+
+    - name: Validate authorized_keys file is not empty
+      fail:
+        msg: "The authorized_keys file is empty for user {{ new_user }}!"
+      when: authorized_keys_file.stat.exists and authorized_keys_file.stat.size == 0
+
+    - name: Ensure the SSH configuration file is backed up
+      copy:
+        src: /etc/ssh/sshd_config
+        dest: /etc/ssh/sshd_config.bak
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0600
+
+    - name: Configure SSH to disable password authentication and enforce key-based login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+        state: present
+        backup: yes
+
+    - name: Ensure PermitRootLogin is disabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: 'PermitRootLogin prohibit-password'
+        state: present
+        backup: yes
+
+    - name: Ensure PubkeyAuthentication is enabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PubkeyAuthentication'
+        line: 'PubkeyAuthentication yes'
+        state: present
+        backup: yes
+
+    - name: Ensure ChallengeResponseAuthentication is disabled
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?ChallengeResponseAuthentication'
+        line: 'ChallengeResponseAuthentication no'
+        state: present
+        backup: yes
+
+    - name: Restart SSH service to apply changes
+      service:
+        name: ssh
+        state: restarted

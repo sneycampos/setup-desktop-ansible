@@ -50,9 +50,9 @@ You can install Ansible on Ubuntu using the following steps:
     ansible-playbook tools.yml --ask-become-pass
     ```
 
-    Docker
+    Setup Docker, Docker Compose and New User
     ```bash
-    ansible-playbook docker.yml --ask-become-pass
+    ansible-playbook setup.yml --ask-become-pass
     ```
 
 ## What This Playbooks Does
